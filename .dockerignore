@@ -1,0 +1,21 @@
+#git
+
+.git
+.gitignore
+
+#Docker
+.docker
+
+
+#Python
+app/__pycache__/
+app/*/__pycache__/
+app/*/*/__pycache__/
+app/*/*/*/__pycache__/
+
+.env/
+#. Unlike the first line, there's no leading dot and no trailing slash. This means Docker will ignore any file or directory named venv, regardless of its location or whether it's a file or a directory.
+.venv/
+#The trailing slash indicates that .venv is a directory. Docker will ignore this directory and its contents when building the image.
+venv/
+
