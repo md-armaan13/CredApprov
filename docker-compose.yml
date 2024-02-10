@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+
   backend:
     build: 
     # To build the image from the Dockerfile in the current directory, use the build key with the context set to the current directory.
@@ -12,9 +13,10 @@ services:
     volumes:
       - ./app:/app
     command: >
-      sh -c "python manage.py wait_for_db && 
+      sh -c "python manage.py wait_for_db &&
              python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+             python manage.py runserver 0.0.0.0:8000 
+             "
     environment:
       - DB_HOST=db
       - DB_NAME=devdb
@@ -22,6 +24,7 @@ services:
       - DB_PASS=admin
     depends_on:
       - db
+      - redis
 
   db:
     image: postgres:13-alpine
@@ -31,6 +34,30 @@ services:
       POSTGRES_PASSWORD: admin
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  redis:
+      image: redis:latest
+      ports:
+      - "6379:6379"
+
+  celery:
+    build: .
+    volumes:
+      - ./app:/app
+
+    environment:
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=admin
+      - DB_PASS=admin
+    command: >
+      sh -c "while ! nc -z backend 8000; do sleep 1; done &&
+       python manage.py populate_database &&
+       celery -A credapp worker --loglevel=info"
+    depends_on:
+      - db
+      - redis
+      - backend
 
 volumes:
   postgres_data:

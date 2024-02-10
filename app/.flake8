@@ -1,5 +1,5 @@
 
 [flake8]
-exclude = .git,__pycache__,docs/source/conf.py,build,dist,venv,migrations,manage.py
+exclude = .git,__pycache__,docs/source/conf.py,build,dist,venv,migrations,manage.py , settings.py
 max-complexity = 12
 ignore = E501, W503, E203
