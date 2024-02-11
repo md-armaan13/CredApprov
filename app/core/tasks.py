@@ -1,4 +1,7 @@
-"""Celery tasks for the core app."""
+"""
+Celery tasks for the core app.
+
+"""
 
 import pandas as pd
 import os
@@ -20,6 +23,9 @@ loan_file_path = os.path.join(settings.MEDIA_ROOT, 'loan_data.xlsx')
 @shared_task
 def import_excel_data():
     """Populating the database with the data from the excel files."""
+
+    
+    print('Populating the database with the data from the excel files.')
     if Customer.objects.exists() or Loan.objects.exists():
         print('Data already exists in the database. Skipping import.')
         return 

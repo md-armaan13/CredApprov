@@ -1,18 +1,28 @@
-from django.db import models
-from django.core.validators import MinValueValidator
+"""
+Models for the core app.
 
+"""
+from django.db import models
+from django.core.validators import MinValueValidator , RegexValidator
+from .validators import validate_not_empty_or_single_space
+
+phone_regex = RegexValidator(
+    regex=r'^\d{10}$',
+    message="Phone number must be exactly 10 digits long.",
+)
 class Customer(models.Model):
     """
     Customer model.
     """
-    first_name = models.CharField(max_length=100)
 
-    last_name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100 , validators=[validate_not_empty_or_single_space])
+
+    last_name = models.CharField(max_length=100 , validators=[validate_not_empty_or_single_space])
 
     age = models.IntegerField(
         validators=[MinValueValidator(1, message='Age should be positive')])
 
-    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    phone_number = models.CharField(validators=[phone_regex],max_length=10, unique=True)
 
     monthly_salary = models.IntegerField(
         validators=[MinValueValidator(0, message='Salary should be positive')])
@@ -31,6 +41,7 @@ class Loan(models.Model):
     """
     Loan model.
     """
+    
     customer = models.ForeignKey('Customer', on_delete=models.CASCADE)
 
     loan_amount = models.IntegerField(validators=[

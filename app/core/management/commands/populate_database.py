@@ -1,5 +1,7 @@
-import time
-import requests
+"""
+Command to populate the database with the data from the excel file
+
+"""
 from typing import Any
 from django.core.management.base import BaseCommand
 from core.tasks import import_excel_data
@@ -12,4 +14,4 @@ class Command(BaseCommand):
         import_excel_data.delay()
 
 
-        self.stdout.write(self.style.SUCCESS('Django application is running!'))
+        self.stdout.write(self.style.SUCCESS('Task to Populate the Database called successfully...'))

@@ -4,12 +4,9 @@ services:
 
   backend:
     build: 
-    # To build the image from the Dockerfile in the current directory, use the build key with the context set to the current directory.
         context: .
     ports:
       - "3000:8000"
-    # The volumes key is used to mount the app directory from the host into the container. This allows for live code reloading.
-    #we don't need to rebuild the image every time we make a change to the code.
     volumes:
       - ./app:/app
     command: >
@@ -54,6 +51,22 @@ services:
       sh -c "while ! nc -z backend 8000; do sleep 1; done &&
        python manage.py populate_database &&
        celery -A credapp worker --loglevel=info"
+    depends_on:
+      - db
+      - redis
+      - backend
+  tests :
+    build: .
+    command: >
+      sh -c "while ! nc -z backend 8000; do sleep 1; done && 
+        python manage.py test"
+    volumes:
+      - ./app:/app
+    environment:
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=admin
+      - DB_PASS=admin
     depends_on:
       - db
       - redis
