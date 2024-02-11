@@ -19,6 +19,7 @@ services:
       - DB_NAME=devdb
       - DB_USER=admin
       - DB_PASS=admin
+      - SECRET_KEY= 'django-insecure-*abo^9cu^e7uksa=py(eu@&iy-noygyua!l#3h$#=iiu@nubt#'
     depends_on:
       - db
       - redis
@@ -29,6 +30,7 @@ services:
       POSTGRES_DB: devdb
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
+      
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -47,6 +49,7 @@ services:
       - DB_NAME=devdb
       - DB_USER=admin
       - DB_PASS=admin
+      - SECRET_KEY='django-insecure-*abo^9cu^e7uksa=py(eu@&iy-noygyua!l#3h$#=iiu@nubt#'
     command: >
       sh -c "while ! nc -z backend 8000; do sleep 1; done &&
        python manage.py populate_database &&
@@ -67,6 +70,8 @@ services:
       - DB_NAME=devdb
       - DB_USER=admin
       - DB_PASS=admin
+      - SECRET_KEY= 'django-insecure-*abo^9cu^e7uksa=py(eu@&iy-noygyua!l#3h$#=iiu@nubt#'
+
     depends_on:
       - db
       - redis
