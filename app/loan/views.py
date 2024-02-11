@@ -5,13 +5,15 @@ Views for the Loan API's
 from django.http import JsonResponse
 from core.models import Loan, Customer
 from .serializers import CustomerEligibilitySerializer, CustomerEligibilityResponseSerializer, \
-    LoanCreateSerializer, LoanViewSerializer , CustomerLoanSerializer
+    LoanCreateSerializer, LoanViewSerializer, CustomerLoanSerializer
 from rest_framework.views import APIView, exception_handler
 from rest_framework import status
 from datetime import datetime
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from rest_framework.generics import GenericAPIView
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 def calculate_credit_score(customer, loans):
@@ -111,7 +113,34 @@ class CustomerEligibleView(GenericAPIView):
     API to check if a customer is eligible for a loan
 
     '''
+    serializer_class = CustomerEligibilitySerializer
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'customer_id': openapi.Schema(type=openapi.TYPE_INTEGER, default=1),
+                'loan_amount': openapi.Schema(type=openapi.TYPE_NUMBER, default=30000),
+                'interest_rate': openapi.Schema(type=openapi.TYPE_NUMBER, default=5),
+                'tenure': openapi.Schema(type=openapi.TYPE_INTEGER, default=33)
+            }
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'customer_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'approval': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                    'interest_rate': openapi.Schema(type=openapi.TYPE_NUMBER),
+                    'tenure': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'corrected_interest_rate': openapi.Schema(type=openapi.TYPE_NUMBER),
+                    'monthly_installment': openapi.Schema(type=openapi.TYPE_NUMBER),
+                }
+            ),
+            400: "Bad Request",
+            500: "Internal Server Error"
+        }
+    )
     def post(self, request):
 
         serializer = CustomerEligibilitySerializer(data=request.data)
@@ -163,6 +192,34 @@ class LoanCreateView(GenericAPIView):
     """
     API to Create a new loan
     """
+    serializer_class = LoanCreateSerializer
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['customer_id', 'loan_amount', 'interest_rate', 'tenure'],
+            properties={
+                'customer_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'loan_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'interest_rate': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'tenure': openapi.Schema(type=openapi.TYPE_INTEGER),
+            }
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'loan_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'customer_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'loan_approved': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                    'message': openapi.Schema(type=openapi.TYPE_STRING),
+                    'monthly_installment': openapi.Schema(type=openapi.TYPE_NUMBER),
+                }
+            ),
+            400: "Bad Request",
+            500: "Internal Server Error"
+        }
+    )
     def post(self, request):
         serializer = LoanCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -235,7 +292,25 @@ class LoanDetailView(GenericAPIView):
     API to get the details of a loan
     """
     lookup_field = 'loan_id'
+    serializer_class = LoanViewSerializer
 
+    @swagger_auto_schema(
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'customer_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'loan_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
+                    'interest_rate': openapi.Schema(type=openapi.TYPE_NUMBER),
+                    'tenure': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    # Add other properties here as needed
+                }
+            ),
+            400: "Bad Request",
+            500: "Internal Server Error"
+        }
+    )
     def get(self, request,  loan_id):
         """
         Get the details of a loan
@@ -260,7 +335,28 @@ class CustomerLoanDetailView(GenericAPIView):
     Api to get all the active loans of a customer
     '''
     lookup_field = 'customer_id'
+    serializer_class = CustomerLoanSerializer
 
+    @swagger_auto_schema(
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'loan_amount': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'interest_rate': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'tenure': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'monthly_payment': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'repayments_left': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    }
+                )
+            ),
+            400: "Bad Request",
+            500: "Internal Server Error"
+        }
+    )
     def get(self, request,  customer_id):
         """
         Get all the Acitve loans of a customer   
@@ -273,15 +369,16 @@ class CustomerLoanDetailView(GenericAPIView):
             # Active Loans
             no_of_active_loans = [
                 loan for loan in loans if loan.end_date > current_date]
-            
+
             for loan in no_of_active_loans:
                 # we assume that customer has to pay EMI per months , i.e tenure of loan = Total no of EMI
                 # No of Emi left = End_Date_Month - Current_Date_Month
                 loan.repayments_left = int((
                     loan.end_date.year - current_date.year) * 12 - (loan.end_date.month - current_date.month))
- 
-            loan_serializer = CustomerLoanSerializer(no_of_active_loans, many=True)
-            return JsonResponse(loan_serializer.data, status=status.HTTP_200_OK ,safe=False)
+
+            loan_serializer = CustomerLoanSerializer(
+                no_of_active_loans, many=True)
+            return JsonResponse(loan_serializer.data, status=status.HTTP_200_OK, safe=False)
 
         except Loan.DoesNotExist:
             return JsonResponse({"error": "Loan does not exist."},

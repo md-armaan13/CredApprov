@@ -8,6 +8,7 @@ Django==5.0.1
 django-rest-framework==0.1.0
 djangorestframework==3.14.0
 drf-spectacular==0.27.1
+drf-yasg==1.21.7
 et-xmlfile==1.1.0
 filelock==3.13.1
 flake8==7.0.0
@@ -20,6 +21,7 @@ mccabe==0.7.0
 nodeenv==1.8.0
 numpy==1.26.4
 openpyxl==3.1.2
+packaging==23.2
 pandas==2.2.0
 pillow==10.2.0
 platformdirs==4.2.0

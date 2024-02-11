@@ -8,13 +8,35 @@ from core.models import Customer
 from customer.serializers import CustomerSerializer
 from rest_framework.views import exception_handler
 from rest_framework import status
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 class CustomerView(GenericAPIView):
     '''  
     API to register a new customer
     '''
+    serializer_class = CustomerSerializer
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['phone_number'],
+            properties={
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'age': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'monthly_salary': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'phone_number': openapi.Schema(type=openapi.TYPE_STRING),
+                # Add other properties here as needed
+            }
+        ),
+        responses={
+            201: "Created",
+            400: "Bad Request",
+            500: "Internal Server Error"
+        }
+    )
     def post(self, request):
 
         phone_number = request.data.get('phone_number')
