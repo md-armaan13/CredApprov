@@ -7,10 +7,10 @@ The Credit Approval API project aims to provide a robust and efficient system fo
 Ultimately, the Credit Approval API streamlines the loan approval process, providing a reliable solution for financial institutions to assess credit risk and make timely lending decisions. 
 
 Credit Approval Api is available as a hosted service
-at [https://mycreditapi/](http://43.205.103.47:3000/).
+at [https://mycreditapi/](http://15.206.171.158:3000/api/docs/).
 
-A [Swagger API documentaion for Credit Approval API](http://43.205.103.47:3000/api/docs/) is 
-available Here [http://43.205.103.47:3000/api/docs/](http://43.205.103.47:3000/api/docs/).
+A [Swagger API documentaion for Credit Approval API](http://15.206.171.158:3000/api/docs/) is 
+available Here [http://15.206.171.158:3000/api/docs/](http://15.206.171.158:3000/api/docs/).
 
 
 
