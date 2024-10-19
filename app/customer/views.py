@@ -13,7 +13,7 @@ from drf_yasg import openapi
 
 
 class CustomerView(GenericAPIView):
-    '''  
+    '''
     API to register a new customer
     '''
     serializer_class = CustomerSerializer
@@ -52,7 +52,7 @@ class CustomerView(GenericAPIView):
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            print("hello")
+           
             handled_exception = exception_handler(e, None)
             if handled_exception is not None:
                 return handled_exception
